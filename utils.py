@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import tempfile
 from urllib.parse import urlparse
 from typing import Dict, Any, List
@@ -229,16 +230,20 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                         "player_client": clients,
                         "player_skip": ["webpage"]
                     }
-                },
-                "postprocessors": [
+                }
+            }
+
+            # Only add FFmpeg postprocessor if FFmpeg binary is available on system PATH
+            if shutil.which("ffmpeg"):
+                ydl_opts["postprocessors"] = [
                     {
                         "key": "FFmpegExtractAudio",
                         "preferredcodec": preferred_format,
                         "preferredquality": preferred_quality,
                     }
-                ],
-            }
-            allowed_extensions = (".mp3", ".m4a", ".aac", ".ogg", ".wav", ".flac")
+                ]
+
+            allowed_extensions = (".mp3", ".m4a", ".aac", ".ogg", ".wav", ".flac", ".webm")
         else:
             try:
                 height_val = int(quality)
@@ -248,14 +253,15 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             if height_val < 144 or height_val > 4320:
                 raise ValueError("Invalid resolution height requested.")
 
+            # Prioritize combined single-stream MP4 first, then merged streams
             format_spec = (
+                f"best[height<={height_val}][ext=mp4]/"
                 f"bestvideo[height<={height_val}]+bestaudio/"
                 f"best[height<={height_val}]/best"
             )
 
             ydl_opts = {
                 "format": format_spec,
-                "merge_output_format": "mp4",
                 "outtmpl": output_template,
                 "noplaylist": True,
                 "quiet": True,
@@ -265,8 +271,12 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                         "player_client": clients,
                         "player_skip": ["webpage"]
                     }
-                },
+                }
             }
+
+            if shutil.which("ffmpeg"):
+                ydl_opts["merge_output_format"] = "mp4"
+
             allowed_extensions = (".mp4", ".webm", ".mkv", ".mov")
 
         ydl_opts.update(cookie_opts)

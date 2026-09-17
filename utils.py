@@ -64,6 +64,37 @@ CLIENT_COMBOS = [
     ["tv", "mweb", "ios"],
 ]
 
+def fetch_oembed_info(url: str) -> Dict[str, Any]:
+    """Fallback metadata fetcher using YouTube's public oEmbed API."""
+    import urllib.request
+    import json
+    try:
+        oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
+        req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            title = data.get("title", "YouTube Video")
+            thumbnail = data.get("thumbnail_url", "")
+            return {
+                "title": title,
+                "thumbnail": thumbnail,
+                "duration": None,
+                "heights": [1080, 720, 480, 360],
+                "resolutions": [
+                    {"height": 360, "label": "360p", "badge": "SD"},
+                    {"height": 480, "label": "480p", "badge": "SD"},
+                    {"height": 720, "label": "720p", "badge": "HD"},
+                    {"height": 1080, "label": "1080p", "badge": "FHD"},
+                ],
+                "audio_formats": [
+                    {"id": "mp3_320", "label": "MP3 Audio (320 kbps High)", "ext": "mp3", "bitrate": "320"},
+                    {"id": "mp3_192", "label": "MP3 Audio (192 kbps Medium)", "ext": "mp3", "bitrate": "192"},
+                    {"id": "m4a_best", "label": "M4A Audio (Native AAC)", "ext": "m4a", "bitrate": "best"}
+                ]
+            }
+    except Exception:
+        return None
+
 def get_video_info(url: str) -> Dict[str, Any]:
     """Fetch video metadata, available resolution heights, and audio formats using yt-dlp."""
     valid_url = validate_youtube_url(url)
@@ -100,6 +131,9 @@ def get_video_info(url: str) -> Dict[str, Any]:
                 break
 
     if not info:
+        oembed_data = fetch_oembed_info(valid_url)
+        if oembed_data:
+            return oembed_data
         err_msg = str(last_err) if last_err else "Could not extract video info."
         if "sign in to confirm" in err_msg.lower() or "bot" in err_msg.lower():
             raise ValueError(

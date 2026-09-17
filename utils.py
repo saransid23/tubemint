@@ -60,8 +60,8 @@ def get_cookie_opts() -> Dict[str, Any]:
     return opts
 
 CLIENT_COMBOS = [
-    ["tv_embedded", "android_embedded", "android", "ios"],
-    ["android_vr", "android", "mweb"],
+    ["android", "ios", "mweb"],
+    ["web_embedded", "android_vr", "android"],
     ["tv", "mweb", "ios"],
 ]
 

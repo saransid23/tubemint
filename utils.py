@@ -42,14 +42,14 @@ def get_cookie_opts() -> Dict[str, Any]:
     # 2. Cookies from environment variable string (for Vercel/serverless environments)
     cookies_content = os.getenv("YTDLP_COOKIES_CONTENT")
     if cookies_content:
-        cleaned_content = cookies_content.replace("\\n", "\n").replace("\\t", "\t").strip()
+        cleaned_content = cookies_content.strip("'\" \t\r\n").replace("\\n", "\n").replace("\\r", "").replace("\\t", "\t")
         if not cleaned_content.startswith("# Netscape"):
             cleaned_content = "# Netscape HTTP Cookie File\n" + cleaned_content
 
         tmp_cookie_path = os.path.join(tempfile.gettempdir(), "yt_cookies.txt")
         try:
             with open(tmp_cookie_path, "w", encoding="utf-8") as f:
-                f.write(cleaned_content)
+                f.write(cleaned_content + "\n")
             opts["cookiefile"] = tmp_cookie_path
             return opts
         except Exception:
@@ -64,9 +64,9 @@ def get_cookie_opts() -> Dict[str, Any]:
     return opts
 
 CLIENT_COMBOS = [
+    ["web", "android", "ios", "mweb"],
     ["android", "ios", "mweb"],
-    ["android", "mweb"],
-    ["ios", "android"]
+    ["mweb", "android"]
 ]
 
 def fetch_oembed_info(url: str) -> Dict[str, Any]:

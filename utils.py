@@ -61,8 +61,8 @@ def get_cookie_opts() -> Dict[str, Any]:
 
 CLIENT_COMBOS = [
     ["android", "ios", "mweb"],
-    ["web_embedded", "android_vr", "android"],
-    ["tv", "mweb", "ios"],
+    ["android", "mweb"],
+    ["ios", "android"]
 ]
 
 def fetch_oembed_info(url: str) -> Dict[str, Any]:

@@ -126,10 +126,7 @@ def get_video_info(url: str) -> Dict[str, Any]:
                     break
         except Exception as e:
             last_err = e
-            err_str = str(e).lower()
-            if "sign in to confirm" not in err_str and "bot" not in err_str:
-                # If it's a structural or validation error, fail early
-                break
+            continue
 
     if not info:
         oembed_data = fetch_oembed_info(valid_url)
@@ -297,9 +294,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                     break
         except Exception as e:
             last_err = e
-            err_str = str(e).lower()
-            if "sign in to confirm" not in err_str and "bot" not in err_str:
-                break
+            continue
 
     # Fallback search if prepared path differs
     downloaded_files = [

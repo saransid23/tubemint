@@ -194,6 +194,26 @@
       renderOptions();
     });
 
+    function showError(message) {
+      if (message && (message.includes('YTDLP_COOKIES_CONTENT') || message.includes('authentication'))) {
+        errorText.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:0.4rem; text-align:left;">
+            <strong style="font-size:0.95rem;">🔐 Vercel Cookie Setup Required</strong>
+            <span>YouTube limits media downloading from cloud server IPs (Vercel/AWS). To enable downloads on Vercel:</span>
+            <ol style="margin-top:0.3rem; padding-left:1.2rem; font-size:0.85rem; line-height:1.5;">
+              <li>Export YouTube cookies using a browser extension (e.g. <em>Get cookies.txt LOCALLY</em>).</li>
+              <li>In Vercel Dashboard, go to <strong>Settings &rarr; Environment Variables</strong>.</li>
+              <li>Add Key: <code>YTDLP_COOKIES_CONTENT</code> and Value: <em>(pasted cookie text)</em>.</li>
+              <li>Redeploy your Vercel project.</li>
+            </ol>
+          </div>
+        `;
+      } else {
+        errorText.textContent = message || 'Something went wrong.';
+      }
+      errorCard.style.display = 'flex';
+    }
+
     inspectForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawUrl = urlInput.value.trim();
@@ -230,8 +250,7 @@
         renderOptions();
         videoCard.style.display = 'block';
       } catch (err) {
-        errorText.textContent = err.message || 'Something went wrong.';
-        errorCard.style.display = 'flex';
+        showError(err.message);
       } finally {
         submitBtn.disabled = false;
         btnSpinner.style.display = 'none';
@@ -360,8 +379,7 @@
         }, 1000);
 
       } catch (err) {
-        errorText.textContent = err.message || 'Download failed.';
-        errorCard.style.display = 'flex';
+        showError(err.message);
         progressWrapper.style.display = 'none';
         progressBarFill.classList.remove('indeterminate');
       } finally {

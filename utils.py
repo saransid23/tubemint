@@ -112,8 +112,7 @@ def get_video_info(url: str) -> Dict[str, Any]:
             "no_warnings": True,
             "extractor_args": {
                 "youtube": {
-                    "player_client": clients,
-                    "player_skip": ["webpage"]
+                    "player_client": clients
                 }
             }
         }
@@ -224,8 +223,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                 "no_warnings": True,
                 "extractor_args": {
                     "youtube": {
-                        "player_client": clients,
-                        "player_skip": ["webpage"]
+                        "player_client": clients
                     }
                 }
             }
@@ -265,8 +263,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                 "no_warnings": True,
                 "extractor_args": {
                     "youtube": {
-                        "player_client": clients,
-                        "player_skip": ["webpage"]
+                        "player_client": clients
                     }
                 }
             }

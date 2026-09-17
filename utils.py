@@ -27,8 +27,8 @@ def validate_youtube_url(raw_url: str) -> str:
 
 def get_cookie_opts() -> Dict[str, Any]:
     """
-    Returns cookie options for yt-dlp if cookies.txt exists or
-    YTDLP_COOKIES_FROM_BROWSER is specified in environment.
+    Returns cookie options for yt-dlp if cookies.txt exists,
+    YTDLP_COOKIES_CONTENT is set in environment, or YTDLP_COOKIES_FROM_BROWSER is specified.
     """
     opts = {}
     
@@ -38,7 +38,19 @@ def get_cookie_opts() -> Dict[str, Any]:
         opts["cookiefile"] = os.path.abspath(cookie_file)
         return opts
 
-    # 2. Browser cookies option (e.g. chrome, edge, firefox, brave, opera, safari)
+    # 2. Cookies from environment variable string (for Vercel/serverless environments)
+    cookies_content = os.getenv("YTDLP_COOKIES_CONTENT")
+    if cookies_content:
+        tmp_cookie_path = os.path.join(tempfile.gettempdir(), "yt_cookies.txt")
+        try:
+            with open(tmp_cookie_path, "w", encoding="utf-8") as f:
+                f.write(cookies_content)
+            opts["cookiefile"] = tmp_cookie_path
+            return opts
+        except Exception:
+            pass
+
+    # 3. Browser cookies option (e.g. chrome, edge, firefox, brave, opera, safari)
     browser = os.getenv("YTDLP_COOKIES_FROM_BROWSER")
     if browser:
         opts["cookiesfrombrowser"] = (browser.strip().lower(),)
@@ -57,7 +69,7 @@ def get_video_info(url: str) -> Dict[str, Any]:
         "no_warnings": True,
         "extractor_args": {
             "youtube": {
-                "player_client": ["ios", "mweb", "android", "web"]
+                "player_client": ["android", "android_creator", "mweb", "ios", "tv"]
             }
         }
     }
@@ -145,7 +157,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             "no_warnings": True,
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["ios", "mweb", "android", "web"]
+                    "player_client": ["android", "android_creator", "mweb", "ios", "tv"]
                 }
             },
             "postprocessors": [
@@ -181,7 +193,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             "no_warnings": True,
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["ios", "mweb", "android", "web"]
+                    "player_client": ["android", "android_creator", "mweb", "ios", "tv"]
                 }
             },
         }

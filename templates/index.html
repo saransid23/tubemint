@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tubemint — High Performance YouTube Downloader</title>
+  <meta name="description" content="Inspect and download authorized YouTube videos at your desired resolution." />
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="badge">
+        <div class="pulse-dot"></div>
+        Python Powered Downloader
+      </div>
+      <h1 class="title">Tubemint</h1>
+      <p class="subtitle">Download authorized videos in an available resolution effortlessly.</p>
+    </header>
+
+    <!-- Search / URL Form -->
+    <div class="search-card">
+      <form id="inspectForm" class="search-form">
+        <input
+          type="url"
+          id="urlInput"
+          class="url-input"
+          placeholder="Paste a YouTube video URL..."
+          required
+        />
+        <button type="submit" id="submitBtn" class="btn-primary">
+          <span id="btnSpinner" class="spinner" style="display: none;"></span>
+          <span id="btnText">Check Video</span>
+          <svg id="btnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="errorCard" class="error-card" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- Video Metadata Card -->
+    <div id="videoCard" class="video-card" style="display: none;">
+      <div class="thumbnail-wrapper">
+        <img id="thumbnailImg" class="thumbnail-img" src="" alt="Video thumbnail" />
+        <div id="durationTag" class="duration-tag"></div>
+      </div>
+
+      <div class="card-body">
+        <h2 id="videoTitle" class="video-title"></h2>
+
+        <!-- Format Mode Switcher Tabs -->
+        <div class="format-tabs">
+          <button type="button" id="tabVideo" class="tab-btn active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7"></polygon>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+            Video (MP4)
+          </button>
+          <button type="button" id="tabAudio" class="tab-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+            Audio (MP3 / M4A)
+          </button>
+        </div>
+
+        <!-- Video Resolution Options -->
+        <div id="resolutionSection" class="resolution-section">
+          <span class="section-label">Select Video Resolution</span>
+          <div id="resolutionGrid" class="resolution-grid"></div>
+        </div>
+
+        <!-- Audio Format Options -->
+        <div id="audioSection" class="resolution-section" style="display: none;">
+          <span class="section-label">Select Audio Quality</span>
+          <div id="audioGrid" class="audio-grid"></div>
+        </div>
+
+        <button id="downloadBtn" class="btn-download" type="button" disabled>
+          <svg id="downloadIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="downloadSpinner" class="spinner" style="display: none;"></span>
+          <span id="downloadBtnText">Download Media</span>
+        </button>
+        <div id="progressWrapper" class="progress-wrapper" style="display: none;">
+          <div class="progress-bar-track">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+          </div>
+          <span id="progressLabel" class="progress-label">Preparing download…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>Tubemint &copy; 2026 — Use this tool only for content you own or have permission to download.</p>
+  </footer>
+
+  <!-- Frontend Script -->
+  <script>
+    const inspectForm = document.getElementById('inspectForm');
+    const urlInput = document.getElementById('urlInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
+    const errorCard = document.getElementById('errorCard');
+    const errorText = document.getElementById('errorText');
+    const videoCard = document.getElementById('videoCard');
+    const thumbnailImg = document.getElementById('thumbnailImg');
+    const durationTag = document.getElementById('durationTag');
+    const videoTitle = document.getElementById('videoTitle');
+    const tabVideo = document.getElementById('tabVideo');
+    const tabAudio = document.getElementById('tabAudio');
+    const resolutionSection = document.getElementById('resolutionSection');
+    const audioSection = document.getElementById('audioSection');
+    const resolutionGrid = document.getElementById('resolutionGrid');
+    const audioGrid = document.getElementById('audioGrid');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadIcon = document.getElementById('downloadIcon');
+    const downloadSpinner = document.getElementById('downloadSpinner');
+    const downloadBtnText = document.getElementById('downloadBtnText');
+    const progressWrapper = document.getElementById('progressWrapper');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressLabel = document.getElementById('progressLabel');
+
+    let currentUrl = '';
+    let currentMediaType = 'video'; // 'video' or 'audio'
+    let selectedQuality = null;    // video height or audio option ID
+    let fetchedData = null;
+
+    function formatDuration(seconds) {
+      if (!seconds) return '';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    // Tab Event Listeners
+    tabVideo.addEventListener('click', () => {
+      currentMediaType = 'video';
+      tabVideo.classList.add('active');
+      tabAudio.classList.remove('active');
+      resolutionSection.style.display = 'flex';
+      audioSection.style.display = 'none';
+      renderOptions();
+    });
+
+    tabAudio.addEventListener('click', () => {
+      currentMediaType = 'audio';
+      tabAudio.classList.add('active');
+      tabVideo.classList.remove('active');
+      audioSection.style.display = 'flex';
+      resolutionSection.style.display = 'none';
+      renderOptions();
+    });
+
+    inspectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawUrl = urlInput.value.trim();
+      if (!rawUrl) return;
+
+      // Loading state
+      submitBtn.disabled = true;
+      btnSpinner.style.display = 'inline-block';
+      btnIcon.style.display = 'none';
+      btnText.textContent = 'Checking...';
+      errorCard.style.display = 'none';
+      videoCard.style.display = 'none';
+
+      try {
+        const response = await fetch(`/api/info?url=${encodeURIComponent(rawUrl)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Could not fetch video information.');
+        }
+
+        currentUrl = rawUrl;
+        fetchedData = data;
+        videoTitle.textContent = data.title;
+        thumbnailImg.src = data.thumbnail || '';
+        
+        if (data.duration) {
+          durationTag.textContent = `\u23F1 ${formatDuration(data.duration)}`;
+          durationTag.style.display = 'block';
+        } else {
+          durationTag.style.display = 'none';
+        }
+
+        renderOptions();
+        videoCard.style.display = 'block';
+      } catch (err) {
+        errorText.textContent = err.message || 'Something went wrong.';
+        errorCard.style.display = 'flex';
+      } finally {
+        submitBtn.disabled = false;
+        btnSpinner.style.display = 'none';
+        btnIcon.style.display = 'inline-block';
+        btnText.textContent = 'Check Video';
+      }
+    });
+
+    function renderOptions() {
+      if (!fetchedData) return;
+
+      if (currentMediaType === 'video') {
+        resolutionGrid.innerHTML = '';
+        const resList = fetchedData.resolutions || [];
+        if (resList.length > 0) {
+          selectedQuality = resList[resList.length - 1].height; // default highest
+
+          resList.forEach(res => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `res-btn ${res.height === selectedQuality ? 'active' : ''}`;
+            btn.innerHTML = `<span>${res.label}</span><span class="res-badge ${res.badge.toLowerCase()}">${res.badge}</span>`;
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              selectedQuality = res.height;
+              updateDownloadBtn();
+            });
+            resolutionGrid.appendChild(btn);
+          });
+
+          updateDownloadBtn();
+        } else {
+          selectedQuality = null;
+          downloadBtn.disabled = true;
+          downloadBtnText.textContent = 'No video formats available';
+        }
+      } else {
+        // Audio mode
+        audioGrid.innerHTML = '';
+        const audioOpts = fetchedData.audio_formats || [
+          { id: "mp3_320", label: "MP3 320k", ext: "mp3", bitrate: "320 kbps" },
+          { id: "mp3_192", label: "MP3 192k", ext: "mp3", bitrate: "192 kbps" },
+          { id: "m4a_best", label: "M4A AAC", ext: "m4a", bitrate: "Native AAC" }
+        ];
+
+        selectedQuality = audioOpts[0].id; // default MP3 320k
+
+        audioOpts.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `audio-btn ${opt.id === selectedQuality ? 'active' : ''}`;
+          btn.innerHTML = `<span>${opt.label}</span><span class="sub-text">${opt.ext.toUpperCase()}</span>`;
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedQuality = opt.id;
+            updateDownloadBtn();
+          });
+          audioGrid.appendChild(btn);
+        });
+
+        updateDownloadBtn();
+      }
+    }
+
+    function updateDownloadBtn() {
+      if (currentUrl && selectedQuality) {
+        downloadBtn.disabled = false;
+        if (currentMediaType === 'video') {
+          const resList = (fetchedData && fetchedData.resolutions) || [];
+          const match = resList.find(r => r.height === selectedQuality);
+          const label = match ? match.label : `${selectedQuality}p`;
+          downloadBtnText.textContent = `Download ${label} Video (MP4)`;
+        } else {
+          const labels = {
+            'mp3_320': 'Download High Quality MP3 (320 kbps)',
+            'mp3_192': 'Download Medium Quality MP3 (192 kbps)',
+            'm4a_best': 'Download Native M4A Audio'
+          };
+          downloadBtnText.textContent = labels[selectedQuality] || `Download Audio`;
+        }
+      }
+    }
+
+    downloadBtn.addEventListener('click', async () => {
+      if (!currentUrl || !selectedQuality) return;
+
+      const prepareUrl = `/api/prepare?url=${encodeURIComponent(currentUrl)}&media_type=${currentMediaType}&quality=${encodeURIComponent(selectedQuality)}`;
+
+      // Set loading state
+      downloadBtn.disabled = true;
+      downloadIcon.style.display = 'none';
+      downloadSpinner.style.display = 'inline-block';
+      downloadBtnText.textContent = `Preparing ${currentMediaType} download…`;
+      progressWrapper.style.display = 'flex';
+      progressBarFill.style.width = '0%';
+      progressBarFill.classList.add('indeterminate');
+      progressLabel.textContent = `Server is processing the ${currentMediaType}… this may take a moment`;
+      errorCard.style.display = 'none';
+
+      try {
+        const response = await fetch(prepareUrl, { method: 'POST' });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `Prepare failed (HTTP ${response.status})`);
+        }
+
+        // File is ready on server — trigger native browser download
+        progressBarFill.classList.remove('indeterminate');
+        progressBarFill.style.width = '100%';
+        progressLabel.textContent = `Ready — ${formatBytes(data.size)} — starting download…`;
+
+        // Trigger native browser download using anchor element
+        const a = document.createElement('a');
+        a.href = `/api/serve/${data.token}`;
+        a.download = data.filename || 'media';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Brief delay then show success
+        setTimeout(() => {
+          progressLabel.textContent = `Download started — ${formatBytes(data.size)}`;
+        }, 1000);
+
+      } catch (err) {
+        errorText.textContent = err.message || 'Download failed.';
+        errorCard.style.display = 'flex';
+        progressWrapper.style.display = 'none';
+        progressBarFill.classList.remove('indeterminate');
+      } finally {
+        downloadBtn.disabled = false;
+        downloadIcon.style.display = 'inline-block';
+        downloadSpinner.style.display = 'none';
+        updateDownloadBtn();
+      }
+    });
+  </script>
+</body>
+</html>
+

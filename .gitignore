@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Temp files and downloads
+*.mp4
+*.mkv
+*.webm
+*.mp3
+*.m4a
+*.aac
+*.wav
+*.flac
+*.ogg
+test_download.mp4
+tubemint-*/
+
+# Environment & IDE
+.env
+.vscode/
+.idea/
+.DS_Store
+

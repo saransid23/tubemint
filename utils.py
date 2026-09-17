@@ -25,6 +25,27 @@ def validate_youtube_url(raw_url: str) -> str:
     
     return raw_url.strip()
 
+def get_cookie_opts() -> Dict[str, Any]:
+    """
+    Returns cookie options for yt-dlp if cookies.txt exists or
+    YTDLP_COOKIES_FROM_BROWSER is specified in environment.
+    """
+    opts = {}
+    
+    # 1. Custom or default cookies file path
+    cookie_file = os.getenv("YTDLP_COOKIES_PATH", "cookies.txt")
+    if os.path.exists(cookie_file):
+        opts["cookiefile"] = os.path.abspath(cookie_file)
+        return opts
+
+    # 2. Browser cookies option (e.g. chrome, edge, firefox, brave, opera, safari)
+    browser = os.getenv("YTDLP_COOKIES_FROM_BROWSER")
+    if browser:
+        opts["cookiesfrombrowser"] = (browser.strip().lower(),)
+        return opts
+
+    return opts
+
 def get_video_info(url: str) -> Dict[str, Any]:
     """Fetch video metadata, available resolution heights, and audio formats using yt-dlp."""
     valid_url = validate_youtube_url(url)
@@ -35,6 +56,7 @@ def get_video_info(url: str) -> Dict[str, Any]:
         "quiet": True,
         "no_warnings": True,
     }
+    ydl_opts.update(get_cookie_opts())
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(valid_url, download=False)
@@ -141,7 +163,6 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             raise ValueError("Invalid resolution height requested.")
 
         format_spec = (
-            f"bestvideo[height<={height_val}][ext=mp4]+bestaudio[ext=m4a]/"
             f"bestvideo[height<={height_val}]+bestaudio/"
             f"best[height<={height_val}]/best"
         )
@@ -153,28 +174,30 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             "noplaylist": True,
             "quiet": True,
             "no_warnings": True,
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["web", "mweb", "android"]
-                }
-            },
-            "postprocessors": [
-                {
-                    "key": "FFmpegVideoConvertor",
-                    "preferedformat": "mp4"
-                }
-            ]
         }
         allowed_extensions = (".mp4", ".webm", ".mkv", ".mov")
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([valid_url])
+    ydl_opts.update(get_cookie_opts())
 
-    # Find the downloaded file
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(valid_url, download=True)
+        if info:
+            prepared_path = ydl.prepare_filename(info)
+            base_path = os.path.splitext(prepared_path)[0]
+            # Check expected merged mp4 or audio format path first
+            expected_ext = ".mp4" if media_type == "video" else f".{preferred_format}"
+            expected_file = base_path + expected_ext
+            if os.path.exists(expected_file):
+                return expected_file
+            if os.path.exists(prepared_path):
+                return prepared_path
+
+    # Fallback search if prepared path differs
     downloaded_files = [
         os.path.join(output_dir, f) for f in os.listdir(output_dir)
         if f.lower().endswith(allowed_extensions)
         and not f.lower().endswith((".part", ".ytdl", ".temp"))
+        and not re.search(r'\.f\d+\.', f)  # Exclude raw yt-dlp stream fragments
     ]
 
     if not downloaded_files:

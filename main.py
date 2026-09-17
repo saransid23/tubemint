@@ -19,12 +19,15 @@ app = FastAPI(
     version="1.1.0"
 )
 
-# Ensure static and templates directories exist
-os.makedirs("static", exist_ok=True)
-os.makedirs("templates", exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(BASE_DIR, "static")
+templates_dir = os.path.join(BASE_DIR, "templates")
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+os.makedirs(static_dir, exist_ok=True)
+os.makedirs(templates_dir, exist_ok=True)
+
+templates = Jinja2Templates(directory=templates_dir)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # In-memory store for prepared downloads: token -> {path, filename, temp_dir, created_at}
 prepared_downloads: dict = {}

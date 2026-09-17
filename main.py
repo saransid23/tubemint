@@ -59,6 +59,15 @@ cleanup_thread.start()
 async def home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = os.path.join(static_dir, "favicon.ico")
+    if not os.path.exists(favicon_path):
+        favicon_path = os.path.join(BASE_DIR, "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/x-icon")
+    return JSONResponse(status_code=404, content={"error": "Favicon not found"})
+
 @app.get("/api/info")
 async def api_info(url: str = Query(..., description="YouTube Video URL")):
     try:

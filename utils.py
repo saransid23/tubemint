@@ -55,6 +55,11 @@ def get_video_info(url: str) -> Dict[str, Any]:
         "no_playlist": True,
         "quiet": True,
         "no_warnings": True,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["ios", "mweb", "android", "web"]
+            }
+        }
     }
     ydl_opts.update(get_cookie_opts())
 
@@ -140,7 +145,7 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             "no_warnings": True,
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["web", "mweb", "android"]
+                    "player_client": ["ios", "mweb", "android", "web"]
                 }
             },
             "postprocessors": [
@@ -174,6 +179,11 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             "noplaylist": True,
             "quiet": True,
             "no_warnings": True,
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["ios", "mweb", "android", "web"]
+                }
+            },
         }
         allowed_extensions = (".mp4", ".webm", ".mkv", ".mov")
 

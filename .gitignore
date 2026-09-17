@@ -27,4 +27,6 @@ tubemint-*/
 .vscode/
 .idea/
 .DS_Store
+*.zip
+
 

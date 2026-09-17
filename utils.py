@@ -59,10 +59,9 @@ def get_cookie_opts() -> Dict[str, Any]:
     return opts
 
 CLIENT_COMBOS = [
-    ["android", "ios", "mweb", "tv"],
-    ["web_embedded", "android_vr", "android"],
-    ["android_creator", "mweb", "ios"],
-    ["tv", "mweb"]
+    ["tv_embedded", "android_embedded", "android", "ios"],
+    ["android_vr", "android", "mweb"],
+    ["tv", "mweb", "ios"],
 ]
 
 def get_video_info(url: str) -> Dict[str, Any]:
@@ -81,7 +80,8 @@ def get_video_info(url: str) -> Dict[str, Any]:
             "no_warnings": True,
             "extractor_args": {
                 "youtube": {
-                    "player_client": clients
+                    "player_client": clients,
+                    "player_skip": ["webpage"]
                 }
             }
         }
@@ -192,7 +192,8 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                 "no_warnings": True,
                 "extractor_args": {
                     "youtube": {
-                        "player_client": clients
+                        "player_client": clients,
+                        "player_skip": ["webpage"]
                     }
                 },
                 "postprocessors": [
@@ -227,7 +228,8 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
                 "no_warnings": True,
                 "extractor_args": {
                     "youtube": {
-                        "player_client": clients
+                        "player_client": clients,
+                        "player_skip": ["webpage"]
                     }
                 },
             }

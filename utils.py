@@ -253,11 +253,11 @@ def download_media(url: str, media_type: str, quality: str, output_dir: str) -> 
             if height_val < 144 or height_val > 4320:
                 raise ValueError("Invalid resolution height requested.")
 
-            # Prioritize combined single-stream MP4 first, then merged streams
+            # Universal format specification matching best available video and audio streams
             format_spec = (
-                f"best[height<={height_val}][ext=mp4]/"
                 f"bestvideo[height<={height_val}]+bestaudio/"
-                f"best[height<={height_val}]/best"
+                f"best[height<={height_val}]/"
+                f"bestvideo+bestaudio/best"
             )
 
             ydl_opts = {

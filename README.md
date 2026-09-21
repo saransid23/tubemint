@@ -23,10 +23,6 @@
 
 ---
 
-3. **Run the server**:
-   ```bash
-   python main.py
-   ```
 
 4. **Access the application**:
    Open your browser at `http://localhost:8050`

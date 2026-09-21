@@ -22,13 +22,6 @@
   - *Windows*: Download from [FFmpeg.org](https://ffmpeg.org/download.html) or install via `winget install Gyan.FFmpeg` / `choco install ffmpeg`.
 
 ---
-
-
-4. **Access the application**:
-   Open your browser at `http://localhost:8050`
-
----
-
 ## 📡 API Endpoints
 
 | Endpoint | Method | Description |

@@ -1,41 +1,53 @@
+<div align="center">
+
 # 🍃 Tubemint
 
-**Tubemint** is a high-performance, self-hosted YouTube Video Inspector & Downloader web application built with **FastAPI**, **yt-dlp**, and **FFmpeg**. It features a modern, glassmorphic dark-mode UI with emerald accent highlights, real-time video resolution detection, and audio conversion options (MP3/M4A).
+### Self-Hosted YouTube Video Inspector & Downloader
 
----
+<img src="https://readme-typing-svg.demolab.com/?lines=Inspect+any+video.;Detect+up+to+4K.;Download+video+or+audio.&amp;center=true&amp;width=420&amp;height=35&amp;color=10B981&amp;vCenter=true&amp;size=18" />
+
+<img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" />
+<img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" />
+<img src="https://img.shields.io/badge/yt--dlp-FF0000?style=flat-square&amp;logo=youtube&amp;logoColor=white" />
+<img src="https://img.shields.io/badge/FFmpeg-007808?style=flat-square&amp;logo=ffmpeg&amp;logoColor=white" />
+
+</div>
+
+<br>
+
+**Tubemint** is a high-performance, self-hosted YouTube video inspector and downloader web app built with **FastAPI**, **yt-dlp** and **FFmpeg**. It has a modern glassmorphic dark-mode UI with emerald accents, real-time resolution detection, and audio conversion (MP3 / M4A).
+
+> Needs Python 3.10+ and FFmpeg available on your system `PATH`.
+
+<br>
 
 ## ✨ Key Features
 
-- 🎥 **Video Metadata Extraction**: Instantly inspect video title, high-resolution thumbnail, and formatted duration.
-- ⚙️ **Smart Resolution Detection**: Automatically detects and presents available video quality tiers (e.g. 4K 2160p, 2K 1440p, 1080p FHD, 720p HD, 480p/360p SD).
-- 🎵 **Audio Mode Extraction**: Download audio directly in high-bitrate MP3 (320 kbps / 192 kbps) or native M4A (AAC).
-- 🎨 **Premium UI**: Glassmorphic UI styled with vanilla CSS, dynamic responsive layout, and visual download progress indicators.
-- 🧹 **Automatic Cleanup**: Server-side background thread continuously purges expired temporary downloads.
-- 🚀 **Two-Phase Prepared Serving**: Pre-downloads content server-side to guarantee clean byte delivery to browser clients.
+| | Feature | What it does |
+|:---:|---|---|
+| 🎥 | **Metadata Extraction** | Instantly shows the video title, high-resolution thumbnail and formatted duration |
+| ⚙️ | **Smart Resolution Detection** | Detects available tiers: 4K 2160p, 2K 1440p, 1080p FHD, 720p HD, 480p / 360p SD |
+| 🎵 | **Audio Mode** | High-bitrate MP3 (320 / 192 kbps) or native M4A (AAC) |
+| 🎨 | **Premium UI** | Glassmorphic vanilla CSS, responsive layout and visual download progress |
+| 🧹 | **Automatic Cleanup** | A background thread continuously purges expired temporary downloads |
+| 🚀 | **Two-Phase Serving** | Pre-downloads server-side so the browser gets clean byte delivery |
 
----
+<br>
 
-## 🛠️ Requirements
-
-- **Python 3.10+**
-- **FFmpeg**: Must be installed and available on your system `PATH`.
-  - *Windows*: Download from [FFmpeg.org](https://ffmpeg.org/download.html) or install via `winget install Gyan.FFmpeg` / `choco install ffmpeg`.
-
----
 ## 📡 API Endpoints
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | `GET` | Renders the primary HTML user interface |
-| `/api/info?url=<URL>` | `GET` | Fetches video metadata, thumbnail, duration, available video resolutions, and audio format options |
-| `/api/prepare?url=<URL>&media_type=<video\|audio>&quality=<QUALITY>` | `POST` | Prepares the download on the server and returns a single-use token with file size |
-| `/api/serve/{token}` | `GET` | Streams the prepared media file to the browser with clean `Content-Disposition` headers |
+| Method | Endpoint | Description |
+|:---:|---|---|
+| `GET` | `/` | Renders the main HTML interface |
+| `GET` | `/api/info?url=<URL>` | Fetches metadata, thumbnail, duration, resolutions and audio options |
+| `POST` | `/api/prepare?url=<URL>&media_type=<video\|audio>&quality=<QUALITY>` | Prepares the download and returns a single-use token with file size |
+| `GET` | `/api/serve/{token}` | Streams the prepared file with clean `Content-Disposition` headers |
 
----
+<br>
 
 ## 📁 Project Structure
 
-```
+```text
 tubemint/
 ├── main.py              # FastAPI server, background cleanup thread & API router
 ├── utils.py             # yt-dlp integration & FFmpeg post-processing helpers
@@ -47,9 +59,16 @@ tubemint/
 └── README.md            # Project documentation
 ```
 
----
+<br>
 
 ## 📜 Legal & Usage Disclaimer
 
-This tool is created for educational and personal archiving purposes only. Download content only if you hold ownership or explicit permission from the copyright holder. Always respect YouTube's Terms of Service.
+This tool is for educational and personal archiving purposes only. Download content only if you own it or have explicit permission from the copyright holder, and always respect YouTube's Terms of Service.
 
+<br>
+
+<div align="center">
+
+*Tubemint: inspect, prepare, download.*
+
+</div>
